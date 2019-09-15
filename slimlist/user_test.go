@@ -38,7 +38,61 @@ func TestNewUserEmailDublication(t *testing.T) {
 	}
 	_, err = NewUser(email)
 	if err == nil {
-		t.Error("[User] NewUser dublicate email didn't threw any error", err)
+		t.Error("[User] NewUser dublicate email didn't threw any error")
+	}
+
+}
+func TestSetAdmin(t *testing.T) {
+	email := "admin@user.com"
+	u, err := NewUser(email)
+	if err != nil {
+		t.Error("[User] NewUser failed", err)
+	}
+	err = u.SetAdmin()
+	if err != nil {
+		t.Error("[User] SetAdmin failed", err)
+	}
+
+	if u.Role != "Admin" {
+		t.Errorf("Newly setted admin user role was incorrect, got: %s, want: Admin", u.Role)
+	}
+
+}
+
+func TestChangeTaskStatus(t *testing.T) {
+	email := "changetaskadmin@user.com"
+	desc := "new task description"
+	u, err := NewUser(email)
+
+	if err != nil {
+		t.Error("[User] NewUser failed", err)
+	}
+
+	task, err := u.NewTask(desc)
+	if err != nil {
+		t.Error("[User] Newtask failed", err)
+	}
+
+	err = u.ChangeTaskStatus(task, InProgress)
+	if err != nil {
+		t.Error("[User] ChangeTaskStatus failed", err)
+	}
+
+	err = u.ChangeTaskStatus(task, Archived)
+	if err == nil {
+		t.Error("[User] ChangeTaskStatus with non-admin user didn't threw any error")
+
+	}
+
+	err = u.SetAdmin()
+	if err != nil {
+		t.Error("[User] SetAdmin failed", err)
+	}
+
+	err = u.ChangeTaskStatus(task, Archived)
+	if err != nil {
+		t.Error("[User] ChangeTaskStatus failed", err)
+
 	}
 
 }
