@@ -46,7 +46,9 @@ func (u *User) SetAdmin() error {
 
 //NewTask creates new task
 func (u *User) NewTask(description string) (*Task, error) {
-	return &Task{ID: uuid.New().String(), Description: description, Status: New, Users: []User{*u}}, nil
+	t := &Task{ID: uuid.New().String(), Description: description, Status: New, Users: []User{*u}}
+	tasks = append(tasks, *t)
+	return t, nil
 }
 
 //ChangeTaskStatus changes task status

@@ -8,6 +8,8 @@ const (
 	Archived
 )
 
+var tasks []Task
+
 //Task keeps task definition
 type Task struct {
 	ID          string

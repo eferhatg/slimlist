@@ -95,6 +95,10 @@ func TestChangeTaskStatus(t *testing.T) {
 
 	}
 
+	if task.Status != Archived {
+		t.Error("Newly changed status was not Archived")
+	}
+
 }
 
 func TestNewTask(t *testing.T) {
