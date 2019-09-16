@@ -2,6 +2,7 @@ package slimlist
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -46,7 +47,12 @@ func (u *User) SetAdmin() error {
 
 //NewTask creates new task
 func (u *User) NewTask(description string) (*Task, error) {
-	t := &Task{ID: uuid.New().String(), Description: description, Status: New, Users: []User{*u}}
+	t := &Task{
+		ID:          uuid.New().String(),
+		Description: description,
+		Status:      New,
+		Users:       []User{*u},
+	}
 	tasks = append(tasks, *t)
 	return t, nil
 }
@@ -56,6 +62,32 @@ func (u *User) ChangeTaskStatus(task *Task, status int) error {
 	if status == Archived && u.Role != AdminStatus {
 		return errors.New("Only administrator allowed to archive a task")
 	}
-	task.ChangeStatus(Archived)
+	task.ChangeStatus(status)
+
 	return nil
+}
+
+//ChangeTaskStatusWithNotify changes task status with email notification
+func (u *User) ChangeTaskStatusWithNotify(es EmailSender, task *Task, status int) error {
+
+	err := u.notifyTaskUsers(es, task, fmt.Sprintf("Task ID %s . User %s  Status changed from %s to %s", task.ID, u.Email, StatusTexts[task.Status], StatusTexts[status]))
+	if err != nil {
+		return err
+	}
+
+	return u.ChangeTaskStatus(task, status)
+
+}
+
+func (u *User) notifyTaskUsers(es EmailSender, task *Task, msg string) error {
+
+	body := []byte(msg)
+	to := []string{}
+
+	for _, usr := range task.Users {
+		if u.Email != usr.Email {
+			to = append(to, usr.Email)
+		}
+	}
+	return es.Send(to, body)
 }

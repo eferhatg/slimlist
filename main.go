@@ -7,8 +7,10 @@ import (
 )
 
 func main() {
+
 	task1()
 	task2()
+	task3()
 
 }
 
@@ -27,5 +29,15 @@ func task2() {
 	t.AssignToUser(*user2)
 	user1.SetAdmin()
 	user1.ChangeTaskStatus(t, slimlist.Archived)
+	fmt.Println(t)
+}
+
+func task3() {
+	slimlist.SetGlobalEmailSender()
+	user1, _ := slimlist.NewUser("taskchenger@user.com")
+	user2, _ := slimlist.NewUser("eferhatg@gmail.com")
+	t, _ := user1.NewTask("Morning task")
+	t.AssignToUser(*user2)
+	user1.ChangeTaskStatusWithNotify(*slimlist.GlobalEmailSender, t, slimlist.InProgress)
 	fmt.Println(t)
 }

@@ -8,6 +8,14 @@ const (
 	Archived
 )
 
+//StatusTexts keeps status explanations
+var StatusTexts = []string{
+	New:        "New",
+	InProgress: "In Progress",
+	Completed:  "Completed",
+	Archived:   "Archived",
+}
+
 var tasks []Task
 
 //Task keeps task definition
