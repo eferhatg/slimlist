@@ -1,6 +1,7 @@
 package slimlist
 
 import (
+	"errors"
 	"net/smtp"
 	"os"
 	"sync"
@@ -13,7 +14,16 @@ var (
 )
 
 //SetGlobalEmailSender sets the global emailsender object
-func SetGlobalEmailSender() *EmailSender {
+func SetGlobalEmailSender() (*EmailSender, error) {
+
+	if len(os.Getenv("SMTP_USERNAME")) == 0 ||
+		len(os.Getenv("SMTP_PASSWORD")) == 0 ||
+		len(os.Getenv("SMTP_HOST")) == 0 ||
+		len(os.Getenv("SMTP_PORT")) == 0 ||
+		len(os.Getenv("SMTP_SENDER")) == 0 {
+		return nil, errors.New("SMTP environment variables couldn't be found")
+	}
+
 	once.Do(func() {
 		ec := EmailConfig{
 			Username:   os.Getenv("SMTP_USERNAME"),
@@ -26,7 +36,7 @@ func SetGlobalEmailSender() *EmailSender {
 
 		GlobalEmailSender = &es
 	})
-	return GlobalEmailSender
+	return GlobalEmailSender, nil
 }
 
 //EmailConfig keeps email configuration

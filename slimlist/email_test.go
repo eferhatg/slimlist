@@ -51,7 +51,10 @@ func TestEmailSend(t *testing.T) {
 func TestSetGlobalEmailSender(t *testing.T) {
 
 	GlobalEmailSender = nil
-	SetGlobalEmailSender()
+	_, err := SetGlobalEmailSender()
+	if err != nil {
+		t.Errorf("[Email] SetGlobalEmailSender failed: %v", err)
+	}
 	if GlobalEmailSender == nil {
 		t.Errorf("GlobalEmailSender couldn't be set")
 	}
