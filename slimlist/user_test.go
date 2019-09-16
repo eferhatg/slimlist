@@ -1,7 +1,7 @@
 package slimlist
 
 import (
-	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/google/uuid"
@@ -9,30 +9,31 @@ import (
 
 func TestUser(t *testing.T) {
 
+	email := "TestUser@slimlist.com"
 	user := User{
 		ID:    uuid.New().String(),
-		Email: "test@user.com"}
+		Email: email}
 
-	if user.Email != "test@user.com" {
-		t.Errorf("New task email was incorrect, got: %s, want: test@user.com", user.Email)
+	if user.Email != email {
+		t.Errorf("New task user was incorrect, got: %s, want: %s", user.Email, email)
 	}
 
 }
 
 func TestNewUser(t *testing.T) {
-	email := "test@user.com"
+	email := "TestNewUser@slimlist.com"
 	user, err := NewUser(email)
 	if err != nil {
 		t.Error("[User] NewUser failed", err)
 	}
 	if user.Email != email {
-		t.Errorf("New task email was incorrect, got: %s, want: %s", user.Email, email)
+		t.Errorf("New task user was incorrect, got: %s, want: %s", user.Email, email)
 	}
 
 }
 
 func TestNewUserEmailDublication(t *testing.T) {
-	email := "somedubemail@user.com"
+	email := "TestNewUserEmailDublication@slimlist.com"
 	_, err := NewUser(email)
 	if err != nil {
 		t.Error("[User] NewUser failed", err)
@@ -44,7 +45,7 @@ func TestNewUserEmailDublication(t *testing.T) {
 
 }
 func TestSetAdmin(t *testing.T) {
-	email := "admin@user.com"
+	email := "TestSetAdmin@slimlist.com"
 	u, err := NewUser(email)
 	if err != nil {
 		t.Error("[User] NewUser failed", err)
@@ -54,18 +55,18 @@ func TestSetAdmin(t *testing.T) {
 		t.Error("[User] SetAdmin failed", err)
 	}
 
-	if u.Role != "Admin" {
-		t.Errorf("Newly setted admin user role was incorrect, got: %s, want: Admin", u.Role)
+	if u.Role != AdminStatus {
+		t.Errorf("Newly setted admin user role was incorrect, got: %s, want: %s", u.Role, AdminStatus)
 	}
 
 }
 func TestNewTask(t *testing.T) {
-
+	email := "TestNewTask@slimlist.com"
+	desc := "task desc"
 	user := User{
 		ID:    uuid.New().String(),
-		Email: "test@user.com"}
+		Email: email}
 
-	desc := "new task description"
 	newtask, err := user.NewTask(desc)
 	if err != nil {
 		t.Error("[User] Newtask failed", err)
@@ -86,18 +87,18 @@ func TestNewTask(t *testing.T) {
 		t.Errorf("Newly created task users len was incorrect, got: %d, want: %d", len(newtask.Users), 1)
 	}
 
-	if newtask.Users[0].Email != user.Email {
-		t.Errorf("Newly created task user email was incorrect, got: %s, want: %s", newtask.Users[0].Email, user.Email)
+	if newtask.Users[0].Email != email {
+		t.Errorf("Newly created task user email was incorrect, got: %s, want: %s", newtask.Users[0].Email, email)
 	}
 
 }
 
 func TestChangeTaskStatus(t *testing.T) {
 
-	email := "changetaskadmin@user.com"
-	desc := "new task description"
-	u, err := NewUser(email)
+	email := "TestChangeTaskStatus@slimlist.com"
+	desc := "task description"
 
+	u, err := NewUser(email)
 	if err != nil {
 		t.Error("[User] NewUser failed", err)
 	}
@@ -140,8 +141,8 @@ func TestChangeTaskStatusWithNotify(t *testing.T) {
 	f, r := mockSend(nil)
 	sender := &emailSender{send: f}
 
-	email := "changetaskwithnotify@user.com"
-	desc := "new task description"
+	email := "TestChangeTaskStatusWithNotify@slimlist.com"
+	desc := "task description"
 	u, err := NewUser(email)
 
 	if err != nil {
@@ -153,8 +154,7 @@ func TestChangeTaskStatusWithNotify(t *testing.T) {
 		t.Error("[User] Newtask failed", err)
 	}
 
-	body := fmt.Sprintf("Task ID: %s \n User:%s \n\n Status changed from %s to %s", task.ID, u.Email, StatusTexts[task.Status], StatusTexts[InProgress])
-
+	body := u.getNotifyMsg(task, InProgress)
 	err = u.ChangeTaskStatusWithNotify(sender, task, InProgress)
 	if err != nil {
 		t.Error("[User] ChangeTaskStatus failed", err)
@@ -164,7 +164,7 @@ func TestChangeTaskStatusWithNotify(t *testing.T) {
 		t.Errorf("wrong message body.\nexpected: %v\n got: %s", body, r.msg)
 	}
 	if task.Status != InProgress {
-		t.Error("Newly changed status was not InProgress")
+		t.Errorf("Newly changed status was not %d", InProgress)
 	}
 
 }
@@ -173,11 +173,11 @@ func TestNotifyTaskUsers(t *testing.T) {
 	f, r := mockSend(nil)
 	sender := &emailSender{send: f}
 
-	email := "notifytaskusers@user.com"
-	email1 := "notifytaskusers1@user.com"
+	email := "TestNotifyTaskUsers@slimlist.com"
+	email1 := "TestNotifyTaskUsers1@slimlist.com"
 
-	desc := "new task description"
-	body := "msg_body"
+	desc := "task description"
+	body := "msg body"
 
 	u, err := NewUser(email)
 	if err != nil {
@@ -208,10 +208,103 @@ func TestNotifyTaskUsers(t *testing.T) {
 		t.Errorf("wrong message body.\nexpected: %v\n got: %s", body, r.msg)
 	}
 
-	to := []string{u1.Email}
+	if r.to[0] != u1.Email {
+		t.Errorf("wrong message body.\nexpected: %v\n got: %s", u1.Email, r.to[0])
+	}
 
-	if r.to[0] != to[0] {
-		t.Errorf("wrong message body.\nexpected: %v\n got: %s", to[0], r.to[0])
+}
+
+func TestGetNotifyMsg(t *testing.T) {
+	email := "TestGetNotifyMsg@slimlist.com"
+	desc := "task description"
+	u, err := NewUser(email)
+
+	if err != nil {
+		t.Error("[User] NewUser failed", err)
+	}
+
+	task, err := u.NewTask(desc)
+	if err != nil {
+		t.Error("[User] Newtask failed", err)
+	}
+
+	msg := u.getNotifyMsg(task, InProgress)
+
+	if !strings.Contains(msg, email) ||
+		!strings.Contains(msg, task.ID) ||
+		!strings.Contains(msg, StatusTexts[InProgress]) {
+		t.Error("[User] getNotifyMsg generated wrong msg. got:", msg)
+
+	}
+}
+
+func TestAddComment(t *testing.T) {
+	email := "TestAddComment@slimlist.com"
+	desc := "task description"
+	commText := "comment text"
+	u, err := NewUser(email)
+
+	if err != nil {
+		t.Error("[User] NewUser failed", err)
+	}
+
+	task, err := u.NewTask(desc)
+	if err != nil {
+		t.Error("[User] Newtask failed", err)
+	}
+
+	c, err := u.AddComment(commText, task)
+	if err != nil {
+		t.Error("[User] Addcomment failed", err)
+	}
+
+	if c.Comment != commText {
+		t.Errorf("wrong comment text.\nexpected: %v\n got: %s", commText, c.Comment)
+
+	}
+
+	if len(task.Comments) == 0 {
+		t.Error("Newly added comment didn't append to task")
+	}
+	if task.Comments[0].Comment != commText {
+		t.Errorf("wrong comment text.\nexpected: %v\n got: %s", commText, task.Comments[0].Comment)
+	}
+}
+
+func TestDeleteComment(t *testing.T) {
+	email := "TestDeleteComment@slimlist.com"
+	desc := "new task description"
+	u, err := NewUser(email)
+
+	if err != nil {
+		t.Error("[User] NewUser failed", err)
+	}
+
+	task, err := u.NewTask(desc)
+	if err != nil {
+		t.Error("[User] Newtask failed", err)
+	}
+
+	c, err := u.AddComment("comment", task)
+	if err != nil {
+		t.Error("[User] AddComment failed", err)
+	}
+
+	err = u.DeleteComment(c.ID, task)
+	if err == nil {
+		t.Error("Regular user shouldn't delete comment")
+	}
+
+	u.SetAdmin()
+
+	err = u.DeleteComment("different-id", task)
+	if err == nil {
+		t.Error("Should throw error after different-id")
+	}
+
+	err = u.DeleteComment(c.ID, task)
+	if err != nil {
+		t.Error("Administrator should delete comment")
 	}
 
 }

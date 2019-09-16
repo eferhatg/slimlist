@@ -1,5 +1,7 @@
 package slimlist
 
+import "github.com/google/uuid"
+
 //Keeps task status
 const (
 	New = iota
@@ -24,6 +26,17 @@ type Task struct {
 	Description string
 	Status      int
 	Users       []User
+	Comments    []Comment
+}
+
+//NewTask creates new task
+func NewTask(desc string, u *User) *Task {
+	return &Task{
+		ID:          uuid.New().String(),
+		Description: desc,
+		Status:      New,
+		Users:       []User{*u},
+	}
 }
 
 //AssignToUser assigns task to user

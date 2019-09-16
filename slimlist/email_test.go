@@ -24,11 +24,12 @@ func mockSend(errToReturn error) (func(string, smtp.Auth, string, []string, []by
 
 func TestNewEmailSender(t *testing.T) {
 	ec := EmailConfig{
-		Username: "test@test.com",
+		Username: "TestNewEmailSender@slimlist.com",
 	}
+
 	es := NewEmailSender(ec)
 	if reflect.TypeOf(es).String() != "*slimlist.emailSender" {
-		t.Errorf("NewEmailSender type error %v", reflect.TypeOf(es))
+		t.Errorf("NewEmailSender type error. \nexpected: *slimlist.emailSender \ngot %v", reflect.TypeOf(es))
 	}
 
 }
@@ -37,10 +38,10 @@ func TestEmailSend(t *testing.T) {
 	f, r := mockSend(nil)
 	sender := &emailSender{send: f}
 	body := "Hello World"
-	err := sender.Send([]string{"me@example.com"}, []byte(body))
 
+	err := sender.Send([]string{"TestEmailSend@slimlist.com"}, []byte(body))
 	if err != nil {
-		t.Errorf("unexpected error: %s", err)
+		t.Errorf("[Email] Send failed: %v", err)
 	}
 	if string(r.msg) != body {
 		t.Errorf("wrong message body.\nexpected: %v\n got: %s", body, r.msg)

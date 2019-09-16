@@ -11,6 +11,7 @@ func main() {
 	task1()
 	task2()
 	task3()
+	task4()
 
 }
 
@@ -39,5 +40,25 @@ func task3() {
 	t, _ := user1.NewTask("Morning task")
 	t.AssignToUser(*user2)
 	user1.ChangeTaskStatusWithNotify(*slimlist.GlobalEmailSender, t, slimlist.InProgress)
+	fmt.Println(t)
+}
+
+func task4() {
+
+	admin, _ := slimlist.NewUser("admin@user.com")
+	user, _ := slimlist.NewUser("regularuser@gmail.com")
+
+	t, _ := admin.NewTask("Morning task")
+	t.AssignToUser(*user)
+	c, _ := user.AddComment("test_comment", t)
+	err := admin.DeleteComment(c.ID, t)
+	if err != nil {
+		fmt.Println(err)
+	}
+	admin.SetAdmin()
+	err = admin.DeleteComment(c.ID, t)
+	if err != nil {
+		fmt.Println(err)
+	}
 	fmt.Println(t)
 }

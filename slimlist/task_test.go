@@ -8,18 +8,21 @@ import (
 
 func TestTask(t *testing.T) {
 
+	taskdesc := "New Task"
+	email := "TestTask@slimlist.com"
+
 	task := Task{
 		ID:          uuid.New().String(),
-		Description: "New Task",
+		Description: taskdesc,
 		Status:      New,
 		Users: []User{
 			User{
 				ID:    uuid.New().String(),
-				Email: "test@user.com"},
+				Email: email},
 		}}
 
-	if task.Description != "New Task" {
-		t.Errorf("New task description was incorrect, got: %s, want: New Task.", task.Description)
+	if task.Description != taskdesc {
+		t.Errorf("New task description was incorrect, got: %s, want: %s", task.Description, taskdesc)
 	}
 
 	if task.Status != New {
@@ -32,19 +35,23 @@ func TestTask(t *testing.T) {
 }
 
 func TestAssignToUser(t *testing.T) {
+
+	taskdesc := "New Task"
+	email := "TestAssignToUser@slimlist.com"
+	email2 := "TestAssignToUser1@slimlist.com"
+
 	task := Task{
 		ID:          uuid.New().String(),
-		Description: "New Task",
+		Description: taskdesc,
 		Status:      New,
 		Users: []User{
 			User{
 				ID:    uuid.New().String(),
-				Email: "test@user.com"},
+				Email: email},
 		},
 	}
 
-	newuseremail := "newuser@user.com"
-	newuser := User{ID: uuid.New().String(), Email: newuseremail}
+	newuser := User{ID: uuid.New().String(), Email: email2}
 	err := task.AssignToUser(newuser)
 
 	if err != nil {
@@ -57,7 +64,7 @@ func TestAssignToUser(t *testing.T) {
 
 	var found bool
 	for _, u := range task.Users {
-		if u.Email == newuseremail {
+		if u.Email == email2 {
 			found = true
 		}
 	}
@@ -68,14 +75,17 @@ func TestAssignToUser(t *testing.T) {
 }
 
 func TestChangeStatus(t *testing.T) {
+	taskdesc := "New Task"
+	email := "TestChangeStatus@slimlist.com"
+
 	task := Task{
 		ID:          uuid.New().String(),
-		Description: "New Task",
+		Description: taskdesc,
 		Status:      New,
 		Users: []User{
 			User{
 				ID:    uuid.New().String(),
-				Email: "test@user.com"},
+				Email: email},
 		},
 	}
 
