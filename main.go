@@ -6,6 +6,9 @@ import (
 	"github.com/eferhatg/slimlist/slimlist"
 )
 
+/*
+Simulating the cases one by one
+*/
 func main() {
 
 	task1()
@@ -15,6 +18,11 @@ func main() {
 
 }
 
+/*
+Develop a task management system. Each task should have its own status,
+description, and users assigned to it.
+Statuses:  new, in progress, completed, archived.
+*/
 func task1() {
 	user1, _ := slimlist.NewUser("task1user1@user.com")
 	user2, _ := slimlist.NewUser("task1user2@user.com")
@@ -23,6 +31,9 @@ func task1() {
 	fmt.Println(t)
 }
 
+/*
+The system should provide the user roles. Only the administrator should be able to archive tasks.
+*/
 func task2() {
 	user1, _ := slimlist.NewUser("task2user1@user.com")
 	user2, _ := slimlist.NewUser("task2user2@user.com")
@@ -33,6 +44,9 @@ func task2() {
 	fmt.Println(t)
 }
 
+/*
+Users assigned to tasks receive notifications about changes by email.
+*/
 func task3() {
 	slimlist.SetGlobalEmailSender()
 	user1, _ := slimlist.NewUser("taskchenger@user.com")
@@ -43,6 +57,9 @@ func task3() {
 	fmt.Println(t)
 }
 
+/*
+Users should be able to comment on the tasks. Only administrators can delete comments.
+*/
 func task4() {
 
 	admin, _ := slimlist.NewUser("admin@user.com")
